@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 // TODO JPA Implement
-@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
+@SpringBootApplication
 public class SpringTicketApplication {
 
     public static void main(String[] args) {

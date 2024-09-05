@@ -1,13 +1,25 @@
 package com.ticket.user.domain;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "member")
 public class User {
 
-    private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long seq;
+
+    private String userId;
     private String pw;
 
     public User(String userId, String userPw) {
-        this.id = userId.trim();
+        this.userId = userId.trim();
         this.pw = userPw.trim();
+    }
+
+    public User() {
+
     }
 
     public boolean checkPassword(String password) {

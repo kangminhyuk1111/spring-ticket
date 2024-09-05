@@ -3,6 +3,7 @@ package com.ticket.user.service;
 import com.ticket.user.domain.User;
 import com.ticket.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public User join(final String userId, final String userPw) {
 
         // 회원가입 전 id 중복검사
