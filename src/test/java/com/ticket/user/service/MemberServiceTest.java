@@ -100,4 +100,21 @@ class MemberServiceTest {
         // 로그인이 실패 했을때 Exception
         assertThrows(RuntimeException.class, () -> userService.login(userId, wrongPw));
     }
+
+    @Test
+    @DisplayName("로그인 성공 - 기존의 토큰을 반환하는지 테스트")
+    public void login_success_already_exists_token() {
+        // given
+        final String userId = "test";
+        final String userPw = "1234";
+
+        when(memberRepository.findByUserId(userId)).thenReturn(Optional.of(new Member(userId, userPw)));
+
+        // when
+        Token token =  userService.login(userId, userPw);
+        Token alreadyExistToken = userService.login(userId, userPw);
+
+        // then
+        assertThat(token.getToken()).isEqualTo(alreadyExistToken.getToken());
+    }
 }
