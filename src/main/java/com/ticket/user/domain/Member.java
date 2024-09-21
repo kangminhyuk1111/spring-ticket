@@ -4,20 +4,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 @Entity
-public class User {
+public class Member {
 
     @Id
     private String userId;
     private String userPw;
 
-    public User() {}
+    public Member() {}
 
-    public User(String userId, String userPw) {
+    public Member(String userId, String userPw) {
         this.userId = userId.trim();
         this.userPw = userPw.trim();
     }
 
-    public boolean checkPassword(String password) {
-        return this.userPw.equals(password);
+    public boolean checkPassword(String pw) {
+        return this.userPw.equals(pw);
     }
 }
