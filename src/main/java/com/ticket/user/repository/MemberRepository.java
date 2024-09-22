@@ -1,13 +1,13 @@
 package com.ticket.user.repository;
 
-import com.ticket.user.domain.User;
+import com.ticket.user.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    Optional<User> findByUserId(String userId);
+    Optional<Member> findByUserId(String userId);
 }
