@@ -6,10 +6,7 @@ import com.ticket.user.dto.MemberDto;
 import com.ticket.user.dto.MemberLoginDto;
 import com.ticket.user.service.MemberService;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
