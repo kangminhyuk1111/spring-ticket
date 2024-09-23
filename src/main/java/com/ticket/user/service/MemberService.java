@@ -1,5 +1,8 @@
 package com.ticket.user.service;
 
+import com.ticket.exception.member.AlreadyExistMemberException;
+import com.ticket.exception.member.NotFoundMemberException;
+import com.ticket.exception.member.WrongPasswordException;
 import com.ticket.token.domain.Token;
 import com.ticket.token.repository.TokenRepository;
 import com.ticket.user.domain.Member;
@@ -30,7 +33,7 @@ public class MemberService {
 
         // 중복시 예외 처리
         if (existUser.isPresent()) {
-            throw new RuntimeException("이미 존재하는 사용자 ID입니다.");
+            throw new AlreadyExistMemberException();
         }
 
         Member member = new Member(userId, userPw);
@@ -44,11 +47,11 @@ public class MemberService {
 
         // 아이디 존재하는지 검사
         Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 ID입니다."));
+                .orElseThrow(NotFoundMemberException::new);
 
         // 비밀번호 맞는지 검사 -> 아니라면 에러 발생
         if (!member.checkPassword(userPw)) {
-            throw new RuntimeException("비밀번호가 올바르지 않습니다.");
+            throw new WrongPasswordException();
         }
 
         // 이미 발급된 토큰 조회
@@ -71,7 +74,7 @@ public class MemberService {
 
     // 유저의 등급을 어드민으로 올림
     public Member changeMemberRole(final String userId, final MemberRole role) {
-        Member member = memberRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("존재하지 않는 ID 입니다."));
+        Member member = memberRepository.findByUserId(userId).orElseThrow(NotFoundMemberException::new);
 
         member.setRole(role);
 

@@ -1,5 +1,8 @@
 package com.ticket.performance.service;
 
+import com.ticket.exception.member.NotFoundMemberException;
+import com.ticket.exception.performance.AlreadyExistPerformanceException;
+import com.ticket.exception.performance.NotFoundPerformanceException;
 import com.ticket.performance.domain.Performance;
 import com.ticket.performance.repository.PerformanceRepository;
 import com.ticket.token.domain.Token;
@@ -30,7 +33,7 @@ public class PerformanceService {
         checkAdminRole(userId);
 
         if(performanceRepository.findByPerformanceName(performanceName).isPresent()) {
-            throw new RuntimeException("이미 존재하는 공연정보 입니다.");
+            throw new AlreadyExistPerformanceException();
         }
 
         final Performance createPerformance = new Performance(performanceName, maxAcceptPeople, ticketPrice);
@@ -51,7 +54,7 @@ public class PerformanceService {
         // Roll admin 체크
         checkAdminRole(userId);
 
-        Performance performance = performanceRepository.findById(performanceId).orElseThrow(() -> new RuntimeException("존재하지 않는 공연정보 입니다."));
+        Performance performance = performanceRepository.findById(performanceId).orElseThrow(NotFoundPerformanceException::new);
 
         Performance newPerformance = new Performance(
                 performance.getPerformanceId(), // 기존 ID 유지
@@ -64,14 +67,13 @@ public class PerformanceService {
     }
 
     public void payForTicket(final String userId, final Long performanceId, final Long ticketPrice) {
-        Performance performance = performanceRepository.findById(performanceId).orElseThrow(() -> new RuntimeException("존재하지 않는 공연정보 입니다."));
-        Member member = memberRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("존재하지 않는 유저ID 입니다."));
-        Token findTokenByUserId = tokenRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("토큰 정보가 일치하지 않습니다."));
+        Performance performance = performanceRepository.findById(performanceId).orElseThrow(NotFoundPerformanceException::new);
+        Member member = memberRepository.findByUserId(userId).orElseThrow(NotFoundMemberException::new);
+        Token findTokenByUserId = tokenRepository.findByUserId(userId).orElseThrow(RuntimeException::new);
     }
 
     private void checkAdminRole(String userId) {
-        Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저ID입니다."));
+        Member member = memberRepository.findByUserId(userId).orElseThrow(NotFoundPerformanceException::new);
 
         if (!member.getRole().equals(MemberRole.ROLE_ADMIN)) {
             throw new RuntimeException("권한이 없습니다.");
