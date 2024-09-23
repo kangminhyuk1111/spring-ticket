@@ -1,15 +1,15 @@
 package com.ticket.user.domain;
 
 import com.ticket.user.domain.role.MemberRole;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Member {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String userId;
     private String userPw;
 
@@ -17,6 +17,12 @@ public class Member {
     private MemberRole role;
 
     public Member() {}
+
+    public Member(final String userId, final String userPw, final MemberRole role) {
+        this.userId = userId;
+        this.userPw = userPw;
+        this.role = role;
+    }
 
     public Member(String userId, String userPw) {
         this.userId = userId.trim();
@@ -28,11 +34,29 @@ public class Member {
         return this.userPw.equals(pw);
     }
 
+    public boolean isCommon() {
+        return this.role == MemberRole.ROLE_USER;
+    }
+
+    public boolean isAdmin() {
+        return this.role == MemberRole.ROLE_ADMIN;
+    }
+
     public MemberRole getRole() {
         return role;
     }
 
     public void setRole(MemberRole role) {
         this.role = role;
+    }
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", userId='" + userId + '\'' +
+                ", userPw='" + userPw + '\'' +
+                ", role=" + role +
+                '}';
     }
 }

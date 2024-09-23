@@ -1,8 +1,10 @@
 package com.ticket.performance.service;
 
 import com.ticket.exception.member.NotFoundMemberException;
+import com.ticket.exception.member.UnauthorizedAccessException;
 import com.ticket.exception.performance.AlreadyExistPerformanceException;
 import com.ticket.exception.performance.NotFoundPerformanceException;
+import com.ticket.exception.token.InvalidTokenException;
 import com.ticket.performance.domain.Performance;
 import com.ticket.performance.repository.PerformanceRepository;
 import com.ticket.token.domain.Token;
@@ -66,17 +68,19 @@ public class PerformanceService {
         performanceRepository.save(newPerformance);
     }
 
-    public void payForTicket(final String userId, final Long performanceId, final Long ticketPrice) {
+    // 공연 여부 확인, 유저 확인(토큰이 맞는지), userId에 맞는 지갑 가져오기,
+    public void payForTicket(final String userId, final Long performanceId, final Token token, final Long ticketPrice) {
         Performance performance = performanceRepository.findById(performanceId).orElseThrow(NotFoundPerformanceException::new);
         Member member = memberRepository.findByUserId(userId).orElseThrow(NotFoundMemberException::new);
-        Token findTokenByUserId = tokenRepository.findByUserId(userId).orElseThrow(RuntimeException::new);
+        Token findTokenByUserId = tokenRepository.findByUserId(userId).orElseThrow(InvalidTokenException::new);
     }
 
     private void checkAdminRole(String userId) {
         Member member = memberRepository.findByUserId(userId).orElseThrow(NotFoundPerformanceException::new);
 
-        if (!member.getRole().equals(MemberRole.ROLE_ADMIN)) {
-            throw new RuntimeException("권한이 없습니다.");
+        // admin이 아니라면
+        if (!member.isAdmin()) {
+            throw new UnauthorizedAccessException();
         }
     }
 }
