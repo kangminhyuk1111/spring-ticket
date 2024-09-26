@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 public class Performance {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long performanceId;
 
     private String performanceName;
@@ -45,5 +45,9 @@ public class Performance {
 
     public Long getTicketPrice() {
         return ticketPrice;
+    }
+
+    public void setPerformanceId(final Long performanceId) {
+        this.performanceId = performanceId;
     }
 }

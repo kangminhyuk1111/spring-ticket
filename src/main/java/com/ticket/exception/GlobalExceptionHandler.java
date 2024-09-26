@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.rmi.AlreadyBoundException;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler extends Exception{
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundMemberException.class)
     public ResponseEntity<String> handleInvalidUserException(NotFoundMemberException e) {

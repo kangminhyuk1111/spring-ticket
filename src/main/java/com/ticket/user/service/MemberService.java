@@ -4,11 +4,13 @@ import com.ticket.exception.member.AlreadyExistMemberException;
 import com.ticket.exception.member.NotFoundMemberException;
 import com.ticket.exception.member.WrongPasswordException;
 import com.ticket.token.domain.Token;
+import com.ticket.token.repository.TokenJpaRepository;
 import com.ticket.token.repository.TokenRepository;
 import com.ticket.user.domain.Member;
 import com.ticket.user.domain.role.MemberRole;
-import com.ticket.user.repository.MemberRepository;
+import com.ticket.user.repository.MemberJpaRepository;
 import com.ticket.token.provider.TokenProvider;
+import com.ticket.user.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -47,7 +49,7 @@ public class MemberService {
 
         // 아이디 존재하는지 검사
         Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(NotFoundMemberException::new);
+                .orElseThrow(() -> new NotFoundMemberException("존재하지 않는 사용자 입니다."));
 
         // 비밀번호 맞는지 검사 -> 아니라면 에러 발생
         if (!member.checkPassword(userPw)) {
@@ -57,24 +59,21 @@ public class MemberService {
         // 이미 발급된 토큰 조회
         Optional<Token> existingToken = tokenRepository.findByUserId(userId);
 
-        // 기존 토큰이 존재하면 반환
-        if (existingToken.isPresent()) {
-            return existingToken.get();
-        }
+        return existingToken.orElseGet(() -> {
+            // 기존 토큰이 존재하지 않을시, 유저에게 토큰 발급
+            Token token = tokenProvider.createToken(userId);
 
-        // 기존 토큰이 존재하지 않을시, 유저에게 토큰 발급
-        Token token = tokenProvider.createToken(userId);
+            // 토큰을 서버에서 보관함
+            tokenRepository.save(token);
 
-        // 토큰을 서버에서 보관함
-        tokenRepository.save(token);
-
-        return token;
+            return token;
+        });
     }
 
 
     // 유저의 등급을 어드민으로 올림
     public Member changeMemberRole(final String userId, final MemberRole role) {
-        Member member = memberRepository.findByUserId(userId).orElseThrow(NotFoundMemberException::new);
+        Member member = memberRepository.findByUserId(userId).orElseThrow(() -> new NotFoundMemberException("존재하지 않는 사용자 입니다."));
 
         member.setRole(role);
 

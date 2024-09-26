@@ -50,6 +50,10 @@ public class Member {
         this.role = role;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
     @Override
     public String toString() {
         return "Member{" +

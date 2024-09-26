@@ -13,7 +13,7 @@ public class Token {
     private String userId;
     private LocalDateTime expirationTime;
 
-    public Token() {
+    public Token(final Token token, final String userId, final LocalDateTime now) {
     }
 
     public Token(String token, String userId, LocalDateTime expirationTime) {
@@ -28,6 +28,10 @@ public class Token {
 
     public String getToken() {
         return token;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 }
 

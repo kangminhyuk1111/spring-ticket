@@ -10,11 +10,8 @@ import com.ticket.performance.repository.PerformanceRepository;
 import com.ticket.token.domain.Token;
 import com.ticket.token.repository.TokenRepository;
 import com.ticket.user.domain.Member;
-import com.ticket.user.domain.role.MemberRole;
 import com.ticket.user.repository.MemberRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class PerformanceService {
@@ -34,9 +31,7 @@ public class PerformanceService {
         // Roll admin 체크
         checkAdminRole(userId);
 
-        if(performanceRepository.findByPerformanceName(performanceName).isPresent()) {
-            throw new AlreadyExistPerformanceException();
-        }
+        validatePerformanceName(performanceName);
 
         final Performance createPerformance = new Performance(performanceName, maxAcceptPeople, ticketPrice);
 
@@ -71,7 +66,7 @@ public class PerformanceService {
     // 공연 여부 확인, 유저 확인(토큰이 맞는지), userId에 맞는 지갑 가져오기,
     public void payForTicket(final String userId, final Long performanceId, final Token token, final Long ticketPrice) {
         Performance performance = performanceRepository.findById(performanceId).orElseThrow(NotFoundPerformanceException::new);
-        Member member = memberRepository.findByUserId(userId).orElseThrow(NotFoundMemberException::new);
+        Member member = memberRepository.findByUserId(userId).orElseThrow(() -> new NotFoundMemberException("존재하지 않는 유저 입니다."));
         Token findTokenByUserId = tokenRepository.findByUserId(userId).orElseThrow(InvalidTokenException::new);
     }
 
@@ -81,6 +76,12 @@ public class PerformanceService {
         // admin이 아니라면
         if (!member.isAdmin()) {
             throw new UnauthorizedAccessException();
+        }
+    }
+
+    private void validatePerformanceName(final String performanceName) {
+        if(performanceRepository.findByPerformanceName(performanceName).isPresent()) {
+            throw new AlreadyExistPerformanceException();
         }
     }
 }

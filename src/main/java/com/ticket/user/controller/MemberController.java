@@ -27,8 +27,8 @@ public class MemberController {
 
     @PostMapping
     @RequestMapping("/login")
-    public ApiResponse<Token> login(@RequestBody final MemberLoginDto userLoginDto) {
+    public ApiResponse login(@RequestBody final MemberLoginDto userLoginDto) {
         Token token = userService.login(userLoginDto.getUserId(), userLoginDto.getUserPw());
-        return new ApiResponse<>(HttpStatus.OK,"success",token);
+        return new ApiResponse<>(HttpStatus.OK,"success", token.getToken());
     }
 }
