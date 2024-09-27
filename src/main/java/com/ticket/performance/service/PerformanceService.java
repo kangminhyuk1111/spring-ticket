@@ -4,26 +4,30 @@ import com.ticket.exception.member.NotFoundMemberException;
 import com.ticket.exception.member.UnauthorizedAccessException;
 import com.ticket.exception.performance.AlreadyExistPerformanceException;
 import com.ticket.exception.performance.NotFoundPerformanceException;
-import com.ticket.exception.token.InvalidTokenException;
+import com.ticket.payment.service.PaymentService;
+import com.ticket.ticket.domain.Ticket;
 import com.ticket.performance.domain.Performance;
 import com.ticket.performance.repository.PerformanceRepository;
-import com.ticket.token.domain.Token;
+import com.ticket.ticket.repository.TicketRepository;
 import com.ticket.token.repository.TokenRepository;
 import com.ticket.user.domain.Member;
 import com.ticket.user.repository.MemberRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PerformanceService {
 
     private final PerformanceRepository performanceRepository;
     private final MemberRepository memberRepository;
-    private final TokenRepository tokenRepository;
+    private final TicketRepository ticketRepository;
+    private final PaymentService paymentService;
 
-    public PerformanceService(PerformanceRepository performanceRepository, MemberRepository memberRepository, TokenRepository tokenRepository) {
+    public PerformanceService(PerformanceRepository performanceRepository, MemberRepository memberRepository, final TicketRepository ticketRepository, final PaymentService paymentService) {
         this.performanceRepository = performanceRepository;
         this.memberRepository = memberRepository;
-        this.tokenRepository = tokenRepository;
+        this.ticketRepository = ticketRepository;
+        this.paymentService = paymentService;
     }
 
     public void createPerformance(final String userId, final String performanceName, final Integer maxAcceptPeople, final Long ticketPrice) {
@@ -63,11 +67,22 @@ public class PerformanceService {
         performanceRepository.save(newPerformance);
     }
 
-    // 공연 여부 확인, 유저 확인(토큰이 맞는지), userId에 맞는 지갑 가져오기,
-    public void payForTicket(final String userId, final Long performanceId, final Token token, final Long ticketPrice) {
+    @Transactional
+    public void payForTicket(final String userId, final String cardNumber, final Long performanceId, final Long ticketPrice) {
         Performance performance = performanceRepository.findById(performanceId).orElseThrow(NotFoundPerformanceException::new);
         Member member = memberRepository.findByUserId(userId).orElseThrow(() -> new NotFoundMemberException("존재하지 않는 유저 입니다."));
-        Token findTokenByUserId = tokenRepository.findByUserId(userId).orElseThrow(InvalidTokenException::new);
+
+        // 토큰 검증
+
+        // 결제는 반드시 카드로
+        // 결제 api 호출
+        paymentService.processPayment(cardNumber, ticketPrice);
+
+        // 티켓 생성
+        final Ticket ticket = new Ticket(performance, member, ticketPrice, cardNumber);
+
+        // 티켓 저장
+        ticketRepository.save(ticket);
     }
 
     private void checkAdminRole(String userId) {
@@ -80,7 +95,7 @@ public class PerformanceService {
     }
 
     private void validatePerformanceName(final String performanceName) {
-        if(performanceRepository.findByPerformanceName(performanceName).isPresent()) {
+        if (performanceRepository.findByPerformanceName(performanceName).isPresent()) {
             throw new AlreadyExistPerformanceException();
         }
     }

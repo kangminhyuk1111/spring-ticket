@@ -1,10 +1,9 @@
 package com.ticket.payment.domain;
 
 import com.ticket.exception.payment.InsufficientBalanceException;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.ticket.user.domain.Member;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -14,13 +13,15 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String userId;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private Member member;
     private BigDecimal balance;
 
     public Wallet() {}
 
-    public Wallet(String userId, BigDecimal balance) {
-        this.userId = userId;
+    public Wallet(Member member, BigDecimal balance) {
+        this.member = member;
         this.balance = balance;
     }
 
@@ -43,11 +44,6 @@ public class Wallet {
     // 잔액 충전
     public void chargeAmount(BigDecimal amount) {
         deposit(amount);
-    }
-
-    // 유저 id 검증
-    public boolean isUserIdMatch(String userId) {
-        return this.userId.equals(userId);
     }
 
     private void isPaymentable(final BigDecimal ticketPrice) {
